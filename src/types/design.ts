@@ -77,6 +77,23 @@ export interface ComponentArea {
   components: ComponentDefinition[];
 }
 
+export interface ComponentWithArea extends ComponentDefinition {
+  area: ComponentArea['id'];
+}
+
+export interface AreaCoverage {
+  states: Set<ComponentState>;
+  tags: Set<ComponentTag>;
+}
+
+export interface AreaSummary {
+  id: ComponentArea['id'];
+  title: string;
+  totalComponents: number;
+  statesCovered: ComponentState[];
+  tagsCovered: ComponentTag[];
+}
+
 export type TokenPrimitive = string | number;
 export type TokenValue = TokenPrimitive | TokenValue[] | { [key: string]: TokenValue };
 
@@ -153,5 +170,4 @@ export interface DesignTokens {
 }
 
 export type ResolvedDesignTokens = DesignTokens;
-
-export type ComponentLookup = Record<string, ComponentDefinition & { area: ComponentArea['id'] }>;
+export type ComponentLookup = Record<string, ComponentWithArea>;
