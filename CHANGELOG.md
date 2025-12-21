@@ -1,5 +1,10 @@
 # Changelog
 
+## 2025-12-23 (testable facade + onboarding)
+- Refactored `src/index.ts` into pure config resolvers (`resolveFacadeConfig`) plus area/layout service factories to keep the facade thin and unit-testable.
+- Added helper coverage in `src/index.test.ts` to lock in injected lookups and custom token handling.
+- Documented newcomer entry points in `docs/onboarding/README.md` and linked them from the main README.
+
 ## 2025-12-21 (facade)
 - Added injectable facade `createPizzaTagila` plus ready-to-use `pizzaTagila` instance to simplify testing and integration.
 - Expanded onboarding docs (`README.md`, `src/AGENTS.md`) so newcomers see structure, façade usage, and 8pt rules up front.
