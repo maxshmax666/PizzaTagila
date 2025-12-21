@@ -29,26 +29,8 @@ import type {
   SafeAreaToken,
 } from './types/design';
 
-export interface PizzaTagilaConfig {
-  areas?: ComponentArea[];
-  tokens?: DesignTokens;
-}
-
-export interface PizzaTagilaDependencies {
+export interface AreaServices {
   areas: ComponentArea[];
-  tokens: DesignTokens;
-}
-
-export function resolveFacadeConfig(config: PizzaTagilaConfig = {}): PizzaTagilaDependencies {
-  return {
-    areas: config.areas ?? defaultComponentAreas,
-    tokens: config.tokens ?? defaultDesignTokens,
-  };
-}
-
-export interface PizzaTagilaFacade {
-  areas: ComponentArea[];
-  tokens: DesignTokens;
   lookup: ComponentLookup;
   flatten: () => ReturnType<typeof flattenComponentAreas>;
   summarize: () => ReturnType<typeof summarizeAreas>;
@@ -59,6 +41,10 @@ export interface PizzaTagilaFacade {
   getComponentsByState: (state: ComponentState) => ComponentDefinition[];
   getAreaCoverage: (area: ComponentArea) => ReturnType<typeof getAreaCoverage>;
   buildAreaSummary: (area: ComponentArea) => ReturnType<typeof buildAreaSummary>;
+}
+
+export interface LayoutServices {
+  tokens: DesignTokens;
   getSafeArea: (platform: keyof DesignTokens['layout']['safeArea']) => SafeAreaToken;
   getWebContainer: () => ReturnType<typeof getWebContainer>;
   getSpacingScale: () => number[];
@@ -66,10 +52,34 @@ export interface PizzaTagilaFacade {
   isTouchTargetCompliant: (height: number) => boolean;
 }
 
+export interface PizzaTagilaConfig {
+  areas?: ComponentArea[];
+  tokens?: DesignTokens;
+}
+
+export interface PizzaTagilaDependencies {
+  areas: ComponentArea[];
+  tokens: DesignTokens;
+}
+
+export interface PizzaTagilaFactories {
+  createAreaServices?: (areas: ComponentArea[], lookup?: ComponentLookup) => AreaServices;
+  createLayoutServices?: (tokens: DesignTokens) => LayoutServices;
+}
+
+export function resolveFacadeConfig(config: PizzaTagilaConfig = {}): PizzaTagilaDependencies {
+  return {
+    areas: config.areas ?? defaultComponentAreas,
+    tokens: config.tokens ?? defaultDesignTokens,
+  };
+}
+
+export interface PizzaTagilaFacade extends AreaServices, LayoutServices {}
+
 export function createAreaServices(
   areas: ComponentArea[],
   lookup: ComponentLookup = createComponentLookup(areas),
-) {
+): AreaServices {
   return {
     areas,
     lookup,
@@ -85,7 +95,7 @@ export function createAreaServices(
   };
 }
 
-export function createLayoutServices(tokens: DesignTokens) {
+export function createLayoutServices(tokens: DesignTokens): LayoutServices {
   return {
     tokens,
     getSafeArea: (platform: keyof DesignTokens['layout']['safeArea']) =>
@@ -97,18 +107,31 @@ export function createLayoutServices(tokens: DesignTokens) {
   };
 }
 
-export function createPizzaTagila(config: PizzaTagilaConfig = {}): PizzaTagilaFacade {
-  const { areas, tokens } = resolveFacadeConfig(config);
-  const areaServices = createAreaServices(areas);
-  const layoutServices = createLayoutServices(tokens);
+export function composePizzaTagila(
+  dependencies: PizzaTagilaDependencies,
+  factories: PizzaTagilaFactories = {},
+): PizzaTagilaFacade {
+  const areaFactory = factories.createAreaServices ?? createAreaServices;
+  const layoutFactory = factories.createLayoutServices ?? createLayoutServices;
+
+  const areaServices = areaFactory(dependencies.areas);
+  const layoutServices = layoutFactory(dependencies.tokens);
 
   return {
-    areas,
-    tokens,
+    areas: dependencies.areas,
+    tokens: layoutServices.tokens,
     lookup: areaServices.lookup,
     ...areaServices,
     ...layoutServices,
   };
+}
+
+export function createPizzaTagila(
+  config: PizzaTagilaConfig = {},
+  factories: PizzaTagilaFactories = {},
+): PizzaTagilaFacade {
+  const dependencies = resolveFacadeConfig(config);
+  return composePizzaTagila(dependencies, factories);
 }
 
 export const pizzaTagila = createPizzaTagila();

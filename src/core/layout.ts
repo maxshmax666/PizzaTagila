@@ -11,7 +11,7 @@ export function getSpacingScale(tokens: DesignTokens = designTokens) {
 
 export function usesEightPointSpacing(tokens: DesignTokens = designTokens) {
   const { base } = tokens.layout.grid;
-  return getSpacingScale(tokens).every((value) => isOnGrid(value, base));
+  return base === 8 && getSpacingScale(tokens).every((value) => isOnGrid(value, base));
 }
 
 export function isTouchTargetCompliant(

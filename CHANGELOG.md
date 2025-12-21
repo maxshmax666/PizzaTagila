@@ -1,5 +1,11 @@
 # Changelog
 
+## 2025-12-24 (facade factories + architecture canvas)
+- Added architecture canvas (`docs/architecture/README.md`) and scoped agent guide to help newcomers find entry points faster.
+- Introduced `composePizzaTagila` and factory overrides in `createPizzaTagila` to keep the facade testable with custom services.
+- Tightened the eight-point spacing guard to require `grid.base=8` and expanded index tests around injected factories.
+- Updated README with the latest monthly highlights and follow-up tasks.
+
 ## 2025-12-23 (testable facade + onboarding)
 - Refactored `src/index.ts` into pure config resolvers (`resolveFacadeConfig`) plus area/layout service factories to keep the facade thin and unit-testable.
 - Added helper coverage in `src/index.test.ts` to lock in injected lookups and custom token handling.
