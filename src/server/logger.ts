@@ -16,11 +16,11 @@ function resolveLogPath(options?: LoggerOptions) {
   return path.resolve(baseDir, fileName);
 }
 
-export function formatLogLine(
-  message: string,
-  level: LogLevel,
-  timestamp: Date,
-) {
+export function isNodeEnvironment(runtime: typeof process | undefined = process) {
+  return Boolean(runtime?.versions?.node);
+}
+
+export function formatLogLine(message: string, level: LogLevel, timestamp: Date) {
   return `${timestamp.toISOString()} [${level}] ${message}\n`;
 }
 
@@ -29,7 +29,7 @@ export async function appendLog(
   level: LogLevel = 'INFO',
   options?: LoggerOptions,
 ) {
-  if (typeof process === 'undefined' || !process.versions?.node) {
+  if (!isNodeEnvironment()) {
     // Browser/runtime fallback
     console.log(`${level}: ${message}`);
     return null;

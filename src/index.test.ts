@@ -4,6 +4,7 @@ import {
   componentAreas,
   createComponentLookup,
   designTokens,
+  flattenComponentAreas,
   buildAreaSummary,
   findComponentsWithoutMetadata,
   findDuplicateComponentIds,
@@ -77,6 +78,37 @@ describe('component map', () => {
       id: 'duplicate',
       missing: 'tags',
     });
+
+    const validationErrors = validateComponentMap(duplicateAreas);
+    expect(validationErrors).toContain('Duplicate component id "duplicate".');
+    expect(validationErrors).toContain('Component "duplicate" has no tags.');
+  });
+
+  it('flattens areas and validates emptiness', () => {
+    const flattened = flattenComponentAreas(componentAreas);
+    expect(flattened[0]?.area).toBe(componentAreas[0].id);
+
+    const emptyErrors = validateComponentMap([]);
+    expect(emptyErrors).toContain('Component map is empty.');
+  });
+
+  it('reports empty areas and missing states in validation', () => {
+    const faultyAreas = [
+      { ...componentAreas[0], components: [] },
+      {
+        ...componentAreas[1],
+        components: [
+          { ...componentAreas[1].components[0], id: 'dup', states: [], tags: [] },
+          { ...componentAreas[1].components[1], id: 'dup' },
+        ],
+      },
+    ];
+
+    const errors = validateComponentMap(faultyAreas);
+    expect(errors).toContain('Area "navigation" has no components.');
+    expect(errors).toContain('Duplicate component id "dup".');
+    expect(errors).toContain('Component "dup" has no states.');
+    expect(errors).toContain('Component "dup" has no tags.');
   });
 });
 
