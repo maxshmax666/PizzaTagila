@@ -20,6 +20,7 @@ import {
 import { componentAreas as defaultComponentAreas } from './data/componentAreas';
 import { designTokens as defaultDesignTokens } from './design/tokens';
 import type {
+  AreaSummary,
   ComponentArea,
   ComponentDefinition,
   ComponentLookup,
@@ -34,9 +35,8 @@ export interface PizzaTagilaConfig {
   tokens?: DesignTokens;
 }
 
-export interface PizzaTagilaFacade {
+export interface ComponentMapApi {
   areas: ComponentArea[];
-  tokens: DesignTokens;
   lookup: ComponentLookup;
   flatten: () => ReturnType<typeof flattenComponentAreas>;
   summarize: () => ReturnType<typeof summarizeAreas>;
@@ -46,7 +46,10 @@ export interface PizzaTagilaFacade {
   getComponentsByTag: (tag: ComponentTag) => ComponentDefinition[];
   getComponentsByState: (state: ComponentState) => ComponentDefinition[];
   getAreaCoverage: (area: ComponentArea) => ReturnType<typeof getAreaCoverage>;
-  buildAreaSummary: (area: ComponentArea) => ReturnType<typeof buildAreaSummary>;
+  buildAreaSummary: (area: ComponentArea) => AreaSummary;
+}
+
+export interface DesignTokenApi {
   getSafeArea: (platform: keyof DesignTokens['layout']['safeArea']) => SafeAreaToken;
   getWebContainer: () => ReturnType<typeof getWebContainer>;
   getSpacingScale: () => number[];
@@ -54,13 +57,21 @@ export interface PizzaTagilaFacade {
   isTouchTargetCompliant: (height: number) => boolean;
 }
 
-export function createPizzaTagila(config: PizzaTagilaConfig = {}): PizzaTagilaFacade {
-  const areas = config.areas ?? defaultComponentAreas;
-  const tokens = config.tokens ?? defaultDesignTokens;
+export interface PizzaTagilaFacade extends ComponentMapApi, DesignTokenApi {
+  tokens: DesignTokens;
+}
+
+export function createComponentMapApi(
+  areas: ComponentArea[] = defaultComponentAreas,
+): ComponentMapApi {
+  const duplicates = findDuplicateComponentIds(areas);
+
+  if (duplicates.length) {
+    throw new Error(`Duplicate component ids found: ${duplicates.join(', ')}`);
+  }
 
   return {
     areas,
-    tokens,
     lookup: createComponentLookup(areas),
     flatten: () => flattenComponentAreas(areas),
     summarize: () => summarizeAreas(areas),
@@ -71,11 +82,32 @@ export function createPizzaTagila(config: PizzaTagilaConfig = {}): PizzaTagilaFa
     getComponentsByState: (state) => getComponentsByState(state, areas),
     getAreaCoverage: (area) => getAreaCoverage(area),
     buildAreaSummary: (area) => buildAreaSummary(area),
+  };
+}
+
+export function createDesignTokenApi(
+  tokens: DesignTokens = defaultDesignTokens,
+): DesignTokenApi {
+  return {
     getSafeArea: (platform) => getSafeArea(platform, tokens),
     getWebContainer: () => getWebContainer(tokens),
     getSpacingScale: () => getSpacingScale(tokens),
     usesEightPointSpacing: () => usesEightPointSpacing(tokens),
     isTouchTargetCompliant: (height) => isTouchTargetCompliant(height, tokens),
+  };
+}
+
+export function createPizzaTagila(config: PizzaTagilaConfig = {}): PizzaTagilaFacade {
+  const areas = config.areas ?? defaultComponentAreas;
+  const tokens = config.tokens ?? defaultDesignTokens;
+
+  const componentMapApi = createComponentMapApi(areas);
+  const tokenApi = createDesignTokenApi(tokens);
+
+  return {
+    ...componentMapApi,
+    ...tokenApi,
+    tokens,
   };
 }
 
