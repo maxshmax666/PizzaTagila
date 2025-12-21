@@ -4,6 +4,10 @@ import {
   componentAreas,
   createComponentLookup,
   designTokens,
+  buildAreaSummary,
+  findComponentsWithoutMetadata,
+  findDuplicateComponentIds,
+  getAreaCoverage,
   getSafeArea,
   getSpacingScale,
   getWebContainer,
@@ -45,6 +49,34 @@ describe('component map', () => {
   it('validates that map has no structural errors', () => {
     const errors = validateComponentMap(componentAreas);
     expect(errors).toHaveLength(0);
+  });
+
+  it('extracts coverage and summaries for an area', () => {
+    const coverage = getAreaCoverage(componentAreas[0]);
+    const summary = buildAreaSummary(componentAreas[0]);
+
+    expect(coverage.states.has('active')).toBe(true);
+    expect(summary.totalComponents).toBe(componentAreas[0].components.length);
+    expect(summary.tagsCovered).toContain('navigation');
+  });
+
+  it('detects duplicate ids and missing metadata', () => {
+    const duplicateAreas = [
+      {
+        ...componentAreas[0],
+        components: [
+          ...componentAreas[0].components,
+          { ...componentAreas[0].components[0], id: 'duplicate' },
+          { ...componentAreas[0].components[0], id: 'duplicate', tags: [] },
+        ],
+      },
+    ];
+
+    expect(findDuplicateComponentIds(duplicateAreas)).toEqual(['duplicate']);
+    expect(findComponentsWithoutMetadata(duplicateAreas)).toContainEqual({
+      id: 'duplicate',
+      missing: 'tags',
+    });
   });
 });
 
