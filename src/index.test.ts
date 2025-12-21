@@ -20,6 +20,9 @@ import {
   summarizeAreas,
   usesEightPointSpacing,
   validateComponentMap,
+  createAreaServices,
+  createLayoutServices,
+  resolveFacadeConfig,
 } from './index';
 
 describe('component map', () => {
@@ -185,6 +188,65 @@ describe('facade configuration', () => {
     expect(facade.getAreaCoverage(customArea).states.has('active')).toBe(true);
     expect(facade.usesEightPointSpacing()).toBe(false);
     expect(facade.isTouchTargetCompliant(customTokens.layout.grid.touchTargetMin - 1)).toBe(
+      false,
+    );
+  });
+});
+
+describe('facade helpers', () => {
+  it('resolves defaults and supports overrides', () => {
+    const defaults = resolveFacadeConfig();
+    expect(defaults.areas).toBe(componentAreas);
+    expect(defaults.tokens).toBe(designTokens);
+
+    const overrides = resolveFacadeConfig({
+      areas: [],
+      tokens: { ...designTokens, layout: { ...designTokens.layout, grid: { base: 10, touchTargetMin: 48 } } },
+    });
+
+    expect(overrides.areas).toEqual([]);
+    expect(overrides.tokens.layout.grid.base).toBe(10);
+  });
+
+  it('creates area services with reusable lookup', () => {
+    const customAreas = [componentAreas[0]];
+    const lookup = createComponentLookup(customAreas);
+    const services = createAreaServices(customAreas, lookup);
+
+    expect(services.lookup).toBe(lookup);
+    expect(services.flatten()[0]?.area).toBe(customAreas[0].id);
+    expect(services.findDuplicates()).toEqual([]);
+    expect(services.findMissingMetadata()).toEqual([]);
+  });
+
+  it('wraps layout helpers for injected tokens', () => {
+    const customTokens = {
+      ...designTokens,
+      core: {
+        ...designTokens.core,
+        space: {
+          '0': 0,
+          '1': 6,
+          '2': 12,
+          '3': 18,
+          '4': 24,
+          '5': 30,
+          '6': 36,
+          '7': 42,
+          '8': 48,
+        },
+      },
+      layout: {
+        ...designTokens.layout,
+        grid: { ...designTokens.layout.grid, base: 6, touchTargetMin: 54 },
+      },
+    };
+
+    const services = createLayoutServices(customTokens);
+    expect(services.tokens).toBe(customTokens);
+    expect(services.getSpacingScale()[1]).toBe(6);
+    expect(services.usesEightPointSpacing()).toBe(true);
+    expect(services.isTouchTargetCompliant(customTokens.layout.grid.touchTargetMin - 9)).toBe(
       false,
     );
   });

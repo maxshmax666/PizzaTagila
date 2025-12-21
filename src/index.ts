@@ -34,6 +34,18 @@ export interface PizzaTagilaConfig {
   tokens?: DesignTokens;
 }
 
+export interface PizzaTagilaDependencies {
+  areas: ComponentArea[];
+  tokens: DesignTokens;
+}
+
+export function resolveFacadeConfig(config: PizzaTagilaConfig = {}): PizzaTagilaDependencies {
+  return {
+    areas: config.areas ?? defaultComponentAreas,
+    tokens: config.tokens ?? defaultDesignTokens,
+  };
+}
+
 export interface PizzaTagilaFacade {
   areas: ComponentArea[];
   tokens: DesignTokens;
@@ -54,28 +66,48 @@ export interface PizzaTagilaFacade {
   isTouchTargetCompliant: (height: number) => boolean;
 }
 
-export function createPizzaTagila(config: PizzaTagilaConfig = {}): PizzaTagilaFacade {
-  const areas = config.areas ?? defaultComponentAreas;
-  const tokens = config.tokens ?? defaultDesignTokens;
-
+export function createAreaServices(
+  areas: ComponentArea[],
+  lookup: ComponentLookup = createComponentLookup(areas),
+) {
   return {
     areas,
-    tokens,
-    lookup: createComponentLookup(areas),
+    lookup,
     flatten: () => flattenComponentAreas(areas),
     summarize: () => summarizeAreas(areas),
     validate: () => validateComponentMap(areas),
     findDuplicates: () => findDuplicateComponentIds(areas),
     findMissingMetadata: () => findComponentsWithoutMetadata(areas),
-    getComponentsByTag: (tag) => getComponentsByTag(tag, areas),
-    getComponentsByState: (state) => getComponentsByState(state, areas),
-    getAreaCoverage: (area) => getAreaCoverage(area),
-    buildAreaSummary: (area) => buildAreaSummary(area),
-    getSafeArea: (platform) => getSafeArea(platform, tokens),
+    getComponentsByTag: (tag: ComponentTag) => getComponentsByTag(tag, areas),
+    getComponentsByState: (state: ComponentState) => getComponentsByState(state, areas),
+    getAreaCoverage: (area: ComponentArea) => getAreaCoverage(area),
+    buildAreaSummary: (area: ComponentArea) => buildAreaSummary(area),
+  };
+}
+
+export function createLayoutServices(tokens: DesignTokens) {
+  return {
+    tokens,
+    getSafeArea: (platform: keyof DesignTokens['layout']['safeArea']) =>
+      getSafeArea(platform, tokens),
     getWebContainer: () => getWebContainer(tokens),
     getSpacingScale: () => getSpacingScale(tokens),
     usesEightPointSpacing: () => usesEightPointSpacing(tokens),
-    isTouchTargetCompliant: (height) => isTouchTargetCompliant(height, tokens),
+    isTouchTargetCompliant: (height: number) => isTouchTargetCompliant(height, tokens),
+  };
+}
+
+export function createPizzaTagila(config: PizzaTagilaConfig = {}): PizzaTagilaFacade {
+  const { areas, tokens } = resolveFacadeConfig(config);
+  const areaServices = createAreaServices(areas);
+  const layoutServices = createLayoutServices(tokens);
+
+  return {
+    areas,
+    tokens,
+    lookup: areaServices.lookup,
+    ...areaServices,
+    ...layoutServices,
   };
 }
 
