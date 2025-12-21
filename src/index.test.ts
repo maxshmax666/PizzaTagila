@@ -6,6 +6,7 @@ import {
   designTokens,
   flattenComponentAreas,
   buildAreaSummary,
+  createPizzaTagila,
   findComponentsWithoutMetadata,
   findDuplicateComponentIds,
   getAreaCoverage,
@@ -15,6 +16,7 @@ import {
   getComponentsByState,
   getComponentsByTag,
   isTouchTargetCompliant,
+  pizzaTagila,
   summarizeAreas,
   usesEightPointSpacing,
   validateComponentMap,
@@ -129,5 +131,61 @@ describe('design tokens', () => {
   it('keeps touch targets compliant with the grid', () => {
     expect(isTouchTargetCompliant(56, designTokens)).toBe(true);
     expect(isTouchTargetCompliant(40, designTokens)).toBe(false);
+  });
+});
+
+describe('facade configuration', () => {
+  it('exposes a default, ready-to-use facade', () => {
+    expect(pizzaTagila.lookup['button-primary']?.area).toBe('buttons');
+    expect(pizzaTagila.flatten()).toHaveLength(52);
+    expect(pizzaTagila.validate()).toHaveLength(0);
+    expect(pizzaTagila.summarize().some((entry) => entry.id === 'navigation')).toBe(true);
+    expect(pizzaTagila.getSpacingScale()).toEqual([0, 8, 16, 24, 32, 40, 48, 56, 64]);
+    expect(pizzaTagila.usesEightPointSpacing()).toBe(true);
+  });
+
+  it('allows injecting custom areas and tokens for isolated testing', () => {
+    const customArea = {
+      id: 'navigation',
+      title: 'Custom navigation',
+      summary: 'Only one component for testing.',
+      components: [
+        {
+          id: 'nav-only',
+          title: 'NavOnly',
+          description: 'Single component to isolate facade state.',
+          states: ['default', 'active'],
+          tags: ['navigation', 'action'],
+        },
+      ],
+    } as const;
+
+    const customTokens: typeof designTokens = {
+      ...designTokens,
+      layout: {
+        ...designTokens.layout,
+        grid: {
+          ...designTokens.layout.grid,
+          base: 10,
+          touchTargetMin: designTokens.layout.grid.touchTargetMin + 2,
+        },
+      },
+    };
+
+    const facade = createPizzaTagila({
+      areas: [customArea],
+      tokens: customTokens,
+    });
+
+    expect(facade.lookup['nav-only']?.area).toBe('navigation');
+    expect(facade.flatten()).toHaveLength(1);
+    expect(facade.findDuplicates()).toEqual([]);
+    expect(facade.findMissingMetadata()).toEqual([]);
+    expect(facade.validate()).toEqual([]);
+    expect(facade.getAreaCoverage(customArea).states.has('active')).toBe(true);
+    expect(facade.usesEightPointSpacing()).toBe(false);
+    expect(facade.isTouchTargetCompliant(customTokens.layout.grid.touchTargetMin - 1)).toBe(
+      false,
+    );
   });
 });

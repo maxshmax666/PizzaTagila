@@ -1,5 +1,10 @@
 # Changelog
 
+## 2025-12-21 (facade)
+- Added injectable facade `createPizzaTagila` plus ready-to-use `pizzaTagila` instance to simplify testing and integration.
+- Expanded onboarding docs (`README.md`, `src/AGENTS.md`) so newcomers see structure, façade usage, and 8pt rules up front.
+- Hardened index tests with injected data to keep coverage high around the public API surface.
+
 ## 2025-12-21
 - Refactored core helpers into `src/core` and moved design tokens to `src/design/tokens.ts` for better testability and newcomer onboarding.
 - Added Python formatting toolchain (`black`, `isort`) via `pyproject.toml` and `.pre-commit-config.yaml`.
