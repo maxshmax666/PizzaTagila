@@ -4,8 +4,12 @@ import {
   componentAreas,
   createComponentLookup,
   designTokens,
+  getSafeArea,
+  getSpacingScale,
+  getWebContainer,
   getComponentsByState,
   getComponentsByTag,
+  isTouchTargetCompliant,
   summarizeAreas,
   usesEightPointSpacing,
   validateComponentMap,
@@ -46,6 +50,20 @@ describe('component map', () => {
 
 describe('design tokens', () => {
   it('keeps spacing on the 8pt grid', () => {
+    const spacing = getSpacingScale(designTokens);
+
+    expect(spacing).toEqual([0, 8, 16, 24, 32, 40, 48, 56, 64]);
     expect(usesEightPointSpacing(designTokens)).toBe(true);
+  });
+
+  it('exposes platform safe areas and container rules', () => {
+    expect(getSafeArea('ios', designTokens).topMin).toBe(44);
+    expect(getSafeArea('android', designTokens).bottomMin).toBe(16);
+    expect(getWebContainer(designTokens)).toEqual({ maxWidth: 480, paddingX: 16 });
+  });
+
+  it('keeps touch targets compliant with the grid', () => {
+    expect(isTouchTargetCompliant(56, designTokens)).toBe(true);
+    expect(isTouchTargetCompliant(40, designTokens)).toBe(false);
   });
 });

@@ -77,18 +77,81 @@ export interface ComponentArea {
   components: ComponentDefinition[];
 }
 
-export interface DesignTokens {
-  colors: Record<string, string>;
-  spacing: number[];
-  radii: Record<string, number>;
-  shadows: Record<string, string>;
-  typography: Record<
-    string,
-    {
-      size: number;
-      lineHeight: number;
-      weight: number;
-      letterSpacing?: number;
-    }
-  >;
+export type TokenPrimitive = string | number;
+export type TokenValue = TokenPrimitive | TokenValue[] | { [key: string]: TokenValue };
+
+export interface ShadowToken {
+  x: number;
+  y: number;
+  blur: number;
+  spread: number;
+  color: string;
 }
+
+export interface SafeAreaToken {
+  topMin: number;
+  bottomMin: number;
+}
+
+export interface TypographyMeasure {
+  size: number;
+  lineHeight: number;
+  weight: number;
+  letterSpacing?: number;
+}
+
+export interface DesignTokens {
+  meta: {
+    name: string;
+    version: string;
+    grid: string;
+    platforms: string[];
+  };
+  core: {
+    color: {
+      orange: Record<string, string>;
+      green: Record<string, string>;
+      neutral: Record<string, string>;
+      red: Record<string, string>;
+      blue: Record<string, string>;
+    };
+    space: Record<string, number>;
+    radius: Record<string, number>;
+    stroke: Record<string, number>;
+    shadow: Record<string, ShadowToken>;
+    typography: {
+      fontFamily: { base: string };
+      weight: Record<string, number>;
+      size: Record<string, number>;
+      lineHeight: Record<string, number>;
+      letterSpacing: Record<string, number>;
+    };
+  };
+  semantic: Record<string, TokenValue>;
+  layout: {
+    grid: {
+      base: number;
+      touchTargetMin: number;
+    };
+    safeArea: {
+      ios: SafeAreaToken;
+      android: SafeAreaToken;
+      web: SafeAreaToken;
+    };
+    container: {
+      web: {
+        maxWidth: number;
+        paddingX: number;
+      };
+    };
+    breakpoints: {
+      web: Record<string, number>;
+    };
+  };
+  components: Record<string, TokenValue>;
+  typographyStyles: Record<string, TypographyMeasure>;
+}
+
+export type ResolvedDesignTokens = DesignTokens;
+
+export type ComponentLookup = Record<string, ComponentDefinition & { area: ComponentArea['id'] }>;

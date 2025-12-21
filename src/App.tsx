@@ -3,6 +3,10 @@ import {
   componentAreas,
   createComponentLookup,
   designTokens,
+  getSafeArea,
+  getSpacingScale,
+  getWebContainer,
+  isTouchTargetCompliant,
   summarizeAreas,
   usesEightPointSpacing,
 } from './index';
@@ -10,10 +14,16 @@ import './App.css';
 
 const lookup = createComponentLookup(componentAreas);
 const areaSummaries = summarizeAreas(componentAreas);
+const spacingScale = getSpacingScale(designTokens);
+const safeAreaIos = getSafeArea('ios', designTokens);
+const safeAreaAndroid = getSafeArea('android', designTokens);
+const webContainer = getWebContainer(designTokens);
 
 function App() {
   const totalComponents = Object.keys(lookup).length;
   const eightPointReady = usesEightPointSpacing(designTokens);
+  const buttonHeight = Number(designTokens.components.button.height);
+  const touchFriendly = isTouchTargetCompliant(buttonHeight, designTokens);
 
   return (
     <div className="page">
@@ -34,6 +44,9 @@ function App() {
           <span className="pill pill--ghost">
             {eightPointReady ? '8pt готово' : 'нужен 8pt'}
           </span>
+          <span className="pill pill--ghost">
+            {touchFriendly ? '48px touch' : 'Меньше 48px'}
+          </span>
         </div>
       </header>
 
@@ -42,22 +55,22 @@ function App() {
           <p className="eyebrow">Цвета</p>
           <ul>
             <li>
-              <strong>Primary:</strong> {designTokens.colors.primary}
+              <strong>Primary:</strong> {designTokens.core.color.orange['500']}
             </li>
             <li>
-              <strong>Accent:</strong> {designTokens.colors.accent}
+              <strong>Success:</strong> {designTokens.core.color.green['500']}
             </li>
             <li>
-              <strong>Surface:</strong> {designTokens.colors.surface}
+              <strong>Surface:</strong> {designTokens.core.color.neutral['0']}
             </li>
             <li>
-              <strong>Border:</strong> {designTokens.colors.border}
+              <strong>Border:</strong> {designTokens.semantic.border.default}
             </li>
           </ul>
         </div>
         <div className="token-card">
           <p className="eyebrow">Отступы 8pt</p>
-          <p>{designTokens.spacing.join(' / ')} px</p>
+          <p>{spacingScale.join(' / ')} px</p>
           <p className="muted">
             Используйте step=8 для паддингов, gaps, высот и размеров иконок
             (16/24/32).
@@ -65,13 +78,27 @@ function App() {
         </div>
         <div className="token-card">
           <p className="eyebrow">Радиусы и тени</p>
-          <p>Radii: {Object.values(designTokens.radii).join(' / ')} px</p>
-          <p>Shadow: {designTokens.shadows.card}</p>
+          <p>Radii: {Object.values(designTokens.core.radius).join(' / ')} px</p>
+          <p>
+            Shadow:{' '}
+            {designTokens.core.shadow.md
+              ? `${designTokens.core.shadow.md.x}/${designTokens.core.shadow.md.y}/${designTokens.core.shadow.md.blur}`
+              : 'нет'}
+          </p>
         </div>
         <div className="token-card">
           <p className="eyebrow">Типографика</p>
-          <p>H1 {designTokens.typography.h1.size}px / Body {designTokens.typography.body.size}px</p>
+          <p>
+            H1 {designTokens.typographyStyles.h1.size}px / Body{' '}
+            {designTokens.typographyStyles.body.size}px
+          </p>
           <p className="muted">Используем полужирный 500–700 для читаемости.</p>
+        </div>
+        <div className="token-card">
+          <p className="eyebrow">Safe area</p>
+          <p>iOS: top {safeAreaIos.topMin}px / bottom {safeAreaIos.bottomMin}px</p>
+          <p>Android: top {safeAreaAndroid.topMin}px / bottom {safeAreaAndroid.bottomMin}px</p>
+          <p>Web container: {webContainer.maxWidth}px, padding {webContainer.paddingX}px</p>
         </div>
       </section>
 
