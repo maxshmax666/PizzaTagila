@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+import type { AreaServices, LayoutServices } from './index';
+import type { ComponentArea, ComponentState, ComponentTag } from './types/design';
 
 import {
   componentAreas,
@@ -23,6 +26,7 @@ import {
   createAreaServices,
   createLayoutServices,
   resolveFacadeConfig,
+  composePizzaTagila,
 } from './index';
 
 describe('component map', () => {
@@ -245,9 +249,63 @@ describe('facade helpers', () => {
     const services = createLayoutServices(customTokens);
     expect(services.tokens).toBe(customTokens);
     expect(services.getSpacingScale()[1]).toBe(6);
-    expect(services.usesEightPointSpacing()).toBe(true);
+    expect(services.usesEightPointSpacing()).toBe(false);
     expect(services.isTouchTargetCompliant(customTokens.layout.grid.touchTargetMin - 9)).toBe(
       false,
     );
+  });
+
+  it('composes the facade with overridable service factories', () => {
+    const areas = [componentAreas[0]];
+    const lookup = createComponentLookup(areas);
+
+    const stubAreaServices: AreaServices = {
+      areas,
+      lookup,
+      flatten: () => flattenComponentAreas(areas),
+      summarize: () => summarizeAreas(areas),
+      validate: () => ['stub-validation'],
+      findDuplicates: () => ['duplicated-id'],
+      findMissingMetadata: () => [],
+      getComponentsByTag: (tag: ComponentTag) => getComponentsByTag(tag, areas),
+      getComponentsByState: (state: ComponentState) => getComponentsByState(state, areas),
+      getAreaCoverage: (area: ComponentArea) => getAreaCoverage(area),
+      buildAreaSummary: (area: ComponentArea) => buildAreaSummary(area),
+    };
+
+    const stubLayoutServices: LayoutServices = {
+      tokens: designTokens,
+      getSafeArea: (platform: keyof typeof designTokens.layout.safeArea) =>
+        getSafeArea(platform, designTokens),
+      getWebContainer: () => getWebContainer(designTokens),
+      getSpacingScale: () => getSpacingScale(designTokens),
+      usesEightPointSpacing: () => usesEightPointSpacing(designTokens),
+      isTouchTargetCompliant: (height: number) =>
+        isTouchTargetCompliant(height, designTokens),
+    };
+
+    const areaFactory = vi.fn().mockReturnValue(stubAreaServices);
+    const layoutFactory = vi.fn().mockReturnValue(stubLayoutServices);
+
+    const facade = createPizzaTagila(
+      { areas, tokens: designTokens },
+      { createAreaServices: areaFactory, createLayoutServices: layoutFactory },
+    );
+
+    expect(areaFactory).toHaveBeenCalledWith(areas);
+    expect(layoutFactory).toHaveBeenCalledWith(designTokens);
+    expect(facade.lookup).toBe(lookup);
+    expect(facade.validate()).toEqual(['stub-validation']);
+    expect(facade.findDuplicates()).toEqual(['duplicated-id']);
+    expect(facade.isTouchTargetCompliant(designTokens.layout.grid.touchTargetMin)).toBe(true);
+  });
+
+  it('builds a facade from pre-resolved dependencies', () => {
+    const dependencies = resolveFacadeConfig();
+    const facade = composePizzaTagila(dependencies);
+
+    expect(facade.areas).toBe(dependencies.areas);
+    expect(facade.tokens).toBe(dependencies.tokens);
+    expect(facade.lookup['button-primary']?.area).toBe('buttons');
   });
 });
