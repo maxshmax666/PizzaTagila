@@ -47,8 +47,17 @@ export async function appendLog(
 
 export async function readLogContents(options?: LoggerOptions) {
   const logPath = resolveLogPath(options);
-  const buffer = await readFile(logPath, { encoding: 'utf8' });
-  return { logPath, contents: buffer };
+
+  try {
+    const buffer = await readFile(logPath, { encoding: 'utf8' });
+    return { logPath, contents: buffer };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return { logPath, contents: '' };
+    }
+
+    throw error;
+  }
 }
 
 export { resolveLogPath };

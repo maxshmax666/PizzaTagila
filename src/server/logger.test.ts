@@ -27,4 +27,12 @@ describe('logger', () => {
     expect(isNodeEnvironment({} as typeof process)).toBe(false);
     expect(isNodeEnvironment(process)).toBe(true);
   });
+
+  it('returns empty contents when log file is missing', async () => {
+    const cwd = await mkdtemp(path.join(tmpdir(), 'pizzatagila-'));
+    const { contents, logPath } = await readLogContents({ cwd, fileName: 'absent.log' });
+
+    expect(logPath.endsWith('absent.log')).toBe(true);
+    expect(contents).toBe('');
+  });
 });

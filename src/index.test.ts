@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   componentAreas,
   createComponentLookup,
+  createComponentMapApi,
+  createDesignTokenApi,
   designTokens,
   flattenComponentAreas,
   buildAreaSummary,
@@ -131,6 +133,82 @@ describe('design tokens', () => {
   it('keeps touch targets compliant with the grid', () => {
     expect(isTouchTargetCompliant(56, designTokens)).toBe(true);
     expect(isTouchTargetCompliant(40, designTokens)).toBe(false);
+  });
+});
+
+describe('facade helpers', () => {
+  const minimalArea = {
+    id: 'navigation',
+    title: 'Custom navigation',
+    summary: 'Only one component for testing.',
+    components: [
+      {
+        id: 'nav-only',
+        title: 'NavOnly',
+        description: 'Single component to isolate facade state.',
+        states: ['default', 'active'],
+        tags: ['navigation', 'action'],
+      },
+    ],
+  } as const;
+
+  it('builds a component map API with injected areas', () => {
+    const api = createComponentMapApi([minimalArea]);
+
+    expect(api.lookup['nav-only']?.area).toBe('navigation');
+    expect(api.flatten()).toEqual([
+      expect.objectContaining({ id: 'nav-only', area: 'navigation' }),
+    ]);
+    expect(api.summarize()).toEqual([
+      expect.objectContaining({ id: 'navigation', totalComponents: 1 }),
+    ]);
+    expect(api.validate()).toEqual([]);
+    expect(api.findDuplicates()).toEqual([]);
+    expect(api.buildAreaSummary(minimalArea).statesCovered).toContain('active');
+  });
+
+  it('throws when duplicate ids are provided', () => {
+    const duplicateArea = {
+      ...minimalArea,
+      components: [
+        ...minimalArea.components,
+        { ...minimalArea.components[0], id: minimalArea.components[0].id },
+      ],
+    };
+
+    expect(() => createComponentMapApi([duplicateArea])).toThrow(
+      /duplicate component ids/i,
+    );
+  });
+
+  it('creates token helpers with custom spacing and targets', () => {
+    const offGridTokens: typeof designTokens = {
+      ...designTokens,
+      core: {
+        ...designTokens.core,
+        space: {
+          '0': 0,
+          '1': 8,
+          '2': 16,
+        },
+      },
+      layout: {
+        ...designTokens.layout,
+        grid: {
+          ...designTokens.layout.grid,
+          base: 10,
+          touchTargetMin: 52,
+        },
+      },
+    };
+
+    const tokenApi = createDesignTokenApi(offGridTokens);
+
+    expect(tokenApi.getSpacingScale()).toEqual([0, 8, 16]);
+    expect(tokenApi.usesEightPointSpacing()).toBe(false);
+    expect(tokenApi.isTouchTargetCompliant(60)).toBe(true);
+    expect(tokenApi.isTouchTargetCompliant(50)).toBe(false);
+    expect(tokenApi.getSafeArea('web').topMin).toBe(0);
   });
 });
 

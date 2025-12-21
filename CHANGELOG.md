@@ -1,5 +1,10 @@
 # Changelog
 
+## 2025-12-21 (testability)
+- Added component/token API factories with duplicate protection when building lookups plus safer log reading that tolerates missing files.
+- Extended onboarding docs (`docs/ONBOARDING.md`, `data/AGENTS.md`, README backlog) to guide newcomers and highlight follow-up tasks.
+- Strengthened coverage around the facade factories and logger fallbacks to keep CI signals meaningful.
+
 ## 2025-12-21 (facade)
 - Added injectable facade `createPizzaTagila` plus ready-to-use `pizzaTagila` instance to simplify testing and integration.
 - Expanded onboarding docs (`README.md`, `src/AGENTS.md`) so newcomers see structure, façade usage, and 8pt rules up front.
