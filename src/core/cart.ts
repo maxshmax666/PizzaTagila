@@ -17,8 +17,9 @@ export interface CartTotals {
   total: number;
 }
 
-function clampQuantity(quantity: number) {
-  return quantity < 1 ? 1 : quantity;
+export function normalizeQuantity(quantity: number) {
+  const normalized = Number.isNaN(quantity) ? 1 : Math.round(quantity);
+  return normalized < 1 ? 1 : normalized;
 }
 
 export function calculateCartTotals(
@@ -45,14 +46,14 @@ export function updateCartQuantity(
   id: string,
   quantity: number,
 ): CartItem[] {
-  const nextQuantity = clampQuantity(quantity);
+  const nextQuantity = normalizeQuantity(quantity);
   return items.map((item) => (item.id === id ? { ...item, quantity: nextQuantity } : item));
 }
 
 export function changeCartQuantity(items: CartItem[], id: string, delta: number): CartItem[] {
   return items.map((item) => {
     if (item.id !== id) return item;
-    const nextQuantity = clampQuantity(item.quantity + delta);
+    const nextQuantity = normalizeQuantity(item.quantity + delta);
     return { ...item, quantity: nextQuantity };
   });
 }
@@ -60,12 +61,12 @@ export function changeCartQuantity(items: CartItem[], id: string, delta: number)
 export function addItemToCart(items: CartItem[], incoming: CartItem): CartItem[] {
   const existing = items.find((item) => item.id === incoming.id);
   if (!existing) {
-    return [...items, { ...incoming, quantity: clampQuantity(incoming.quantity) }];
+    return [...items, { ...incoming, quantity: normalizeQuantity(incoming.quantity) }];
   }
 
   return items.map((item) =>
     item.id === incoming.id
-      ? { ...item, quantity: clampQuantity(item.quantity + incoming.quantity) }
+      ? { ...item, quantity: normalizeQuantity(item.quantity + incoming.quantity) }
       : item,
   );
 }
