@@ -27,6 +27,8 @@ import {
   createLayoutServices,
   resolveFacadeConfig,
   composePizzaTagila,
+  cloneFacadeDependencies,
+  createFacadeDependencies,
 } from './index';
 
 describe('component map', () => {
@@ -205,11 +207,34 @@ describe('facade helpers', () => {
 
     const overrides = resolveFacadeConfig({
       areas: [],
-      tokens: { ...designTokens, layout: { ...designTokens.layout, grid: { base: 10, touchTargetMin: 48 } } },
+      tokens: {
+        ...designTokens,
+        layout: { ...designTokens.layout, grid: { base: 10, touchTargetMin: 48 } },
+      },
     });
 
     expect(overrides.areas).toEqual([]);
     expect(overrides.tokens.layout.grid.base).toBe(10);
+  });
+
+  it('clones facade dependencies to keep defaults immutable', () => {
+    const cloned = createFacadeDependencies();
+    expect(cloned.areas).not.toBe(componentAreas);
+    expect(cloned.tokens).not.toBe(designTokens);
+
+    cloned.areas[0]!.components[0]!.title = 'Mutated title';
+    cloned.tokens.core.space['1'] = 99;
+
+    expect(componentAreas[0].components[0].title).not.toBe('Mutated title');
+    expect(designTokens.core.space['1']).toBe(8);
+
+    const frozenCopy = cloneFacadeDependencies({
+      areas: componentAreas,
+      tokens: designTokens,
+    });
+
+    expect(frozenCopy.areas).not.toBe(componentAreas);
+    expect(frozenCopy.tokens).not.toBe(designTokens);
   });
 
   it('creates area services with reusable lookup', () => {
@@ -292,8 +317,13 @@ describe('facade helpers', () => {
       { createAreaServices: areaFactory, createLayoutServices: layoutFactory },
     );
 
-    expect(areaFactory).toHaveBeenCalledWith(areas);
-    expect(layoutFactory).toHaveBeenCalledWith(designTokens);
+    const [calledAreas] = areaFactory.mock.calls[0];
+    const [calledTokens] = layoutFactory.mock.calls[0];
+
+    expect(calledAreas).toEqual(areas);
+    expect(calledAreas).not.toBe(areas);
+    expect(calledTokens).toEqual(designTokens);
+    expect(calledTokens).not.toBe(designTokens);
     expect(facade.lookup).toBe(lookup);
     expect(facade.validate()).toEqual(['stub-validation']);
     expect(facade.findDuplicates()).toEqual(['duplicated-id']);
@@ -301,11 +331,14 @@ describe('facade helpers', () => {
   });
 
   it('builds a facade from pre-resolved dependencies', () => {
-    const dependencies = resolveFacadeConfig();
+    const dependencies = createFacadeDependencies();
     const facade = composePizzaTagila(dependencies);
 
-    expect(facade.areas).toBe(dependencies.areas);
-    expect(facade.tokens).toBe(dependencies.tokens);
+    expect(facade.areas).not.toBe(componentAreas);
+    expect(facade.tokens).not.toBe(designTokens);
     expect(facade.lookup['button-primary']?.area).toBe('buttons');
+
+    facade.areas[0]!.components[0]!.title = 'locally mutated';
+    expect(componentAreas[0].components[0].title).not.toBe('locally mutated');
   });
 });

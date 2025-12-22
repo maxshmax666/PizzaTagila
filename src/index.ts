@@ -74,6 +74,30 @@ export function resolveFacadeConfig(config: PizzaTagilaConfig = {}): PizzaTagila
   };
 }
 
+function cloneAreas(areas: ComponentArea[]): ComponentArea[] {
+  return structuredClone(areas);
+}
+
+function cloneTokens(tokens: DesignTokens): DesignTokens {
+  return structuredClone(tokens);
+}
+
+export function cloneFacadeDependencies(
+  dependencies: PizzaTagilaDependencies,
+): PizzaTagilaDependencies {
+  return {
+    areas: cloneAreas(dependencies.areas),
+    tokens: cloneTokens(dependencies.tokens),
+  };
+}
+
+export function createFacadeDependencies(
+  config: PizzaTagilaConfig = {},
+): PizzaTagilaDependencies {
+  const resolved = resolveFacadeConfig(config);
+  return cloneFacadeDependencies(resolved);
+}
+
 export interface PizzaTagilaFacade extends AreaServices, LayoutServices {}
 
 export function createAreaServices(
@@ -111,14 +135,15 @@ export function composePizzaTagila(
   dependencies: PizzaTagilaDependencies,
   factories: PizzaTagilaFactories = {},
 ): PizzaTagilaFacade {
+  const clonedDependencies = cloneFacadeDependencies(dependencies);
   const areaFactory = factories.createAreaServices ?? createAreaServices;
   const layoutFactory = factories.createLayoutServices ?? createLayoutServices;
 
-  const areaServices = areaFactory(dependencies.areas);
-  const layoutServices = layoutFactory(dependencies.tokens);
+  const areaServices = areaFactory(clonedDependencies.areas);
+  const layoutServices = layoutFactory(clonedDependencies.tokens);
 
   return {
-    areas: dependencies.areas,
+    areas: clonedDependencies.areas,
     tokens: layoutServices.tokens,
     lookup: areaServices.lookup,
     ...areaServices,
@@ -130,7 +155,7 @@ export function createPizzaTagila(
   config: PizzaTagilaConfig = {},
   factories: PizzaTagilaFactories = {},
 ): PizzaTagilaFacade {
-  const dependencies = resolveFacadeConfig(config);
+  const dependencies = createFacadeDependencies(config);
   return composePizzaTagila(dependencies, factories);
 }
 
