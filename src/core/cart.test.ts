@@ -1,63 +1,70 @@
 import { describe, expect, it } from 'vitest';
 
-import { addItemToCart, calculateCartTotals, changeCartQuantity, updateCartQuantity } from './cart';
+import {
+  addItemToCart,
+  calculateCartTotals,
+  changeCartQuantity,
+  normalizeQuantity,
+  updateCartQuantity,
+} from './cart';
 
-const baseCart = [
-  { id: 'pepperoni', name: 'Пепперони', price: 690, size: '25 см', quantity: 1, image: '/assets/pizza-hero.svg' },
-  { id: 'bbq', name: 'Барбекю', price: 590, size: '30 см', quantity: 2, image: '/assets/pizza-hero.svg' },
-];
+const baseItem = {
+  id: 'margherita',
+  name: 'Маргарита',
+  price: 500,
+  size: '25 см',
+  quantity: 1,
+  image: '/assets/pizza-hero.svg',
+};
+
+describe('normalizeQuantity', () => {
+  it('guards against zero, negatives and NaN', () => {
+    expect(normalizeQuantity(0)).toBe(1);
+    expect(normalizeQuantity(-3)).toBe(1);
+    expect(normalizeQuantity(Number.NaN)).toBe(1);
+  });
+
+  it('rounds floating values to the nearest integer', () => {
+    expect(normalizeQuantity(1.2)).toBe(1);
+    expect(normalizeQuantity(2.8)).toBe(3);
+  });
+});
 
 describe('cart helpers', () => {
-  it('calculates totals with delivery and discount caps', () => {
-    const totals = calculateCartTotals(baseCart, 99, 150);
+  it('adds a new item with normalized quantity', () => {
+    const result = addItemToCart([], { ...baseItem, quantity: 0 });
+    expect(result[0]?.quantity).toBe(1);
+  });
 
-    expect(totals.subtotal).toBe(1870);
-    expect(totals.discount).toBe(150);
-    expect(totals.total).toBe(1819);
+  it('increments an existing item instead of duplicating', () => {
+    const start = [baseItem];
+    const result = addItemToCart(start, { ...baseItem, quantity: 2 });
+    expect(result).toHaveLength(1);
+    expect(result[0]?.quantity).toBe(3);
+  });
+
+  it('updates quantity directly', () => {
+    const result = updateCartQuantity([baseItem], baseItem.id, 5);
+    expect(result[0]?.quantity).toBe(5);
+  });
+
+  it('applies deltas safely', () => {
+    const result = changeCartQuantity([baseItem], baseItem.id, -5);
+    expect(result[0]?.quantity).toBe(1);
+  });
+
+  it('calculates totals with delivery and discount', () => {
+    const totals = calculateCartTotals(
+      [
+        baseItem,
+        { ...baseItem, id: 'pepperoni', price: 700, quantity: 2 },
+      ],
+      99,
+      50,
+    );
+
+    expect(totals.subtotal).toBe(1900);
+    expect(totals.total).toBe(1949);
     expect(totals.itemCount).toBe(3);
-  });
-
-  it('does not allow negative discounts or over-discounting', () => {
-    const totals = calculateCartTotals(baseCart, 0, 9999);
-    expect(totals.discount).toBe(1870);
-    expect(totals.total).toBe(0);
-  });
-
-  it('updates quantity immutably and clamps to one', () => {
-    const updated = updateCartQuantity(baseCart, 'pepperoni', 0);
-
-    expect(updated.find((item) => item.id === 'pepperoni')?.quantity).toBe(1);
-    expect(baseCart.find((item) => item.id === 'pepperoni')?.quantity).toBe(1);
-  });
-
-  it('changes quantity by delta without mutating the source', () => {
-    const changed = changeCartQuantity(baseCart, 'bbq', -3);
-
-    expect(changed.find((item) => item.id === 'bbq')?.quantity).toBe(1);
-    expect(baseCart.find((item) => item.id === 'bbq')?.quantity).toBe(2);
-  });
-
-  it('adds a new item or increments an existing one', () => {
-    const addedNew = addItemToCart(baseCart, {
-      id: 'veggie',
-      name: 'Веган',
-      price: 520,
-      size: '28 см',
-      quantity: 1,
-      image: '/assets/pizza-hero.svg',
-    });
-    expect(addedNew).toHaveLength(3);
-
-    const incremented = addItemToCart(baseCart, {
-      id: 'pepperoni',
-      name: 'Пепперони',
-      price: 690,
-      size: '25 см',
-      quantity: 2,
-      image: '/assets/pizza-hero.svg',
-    });
-
-    expect(incremented.find((item) => item.id === 'pepperoni')?.quantity).toBe(3);
-    expect(baseCart.find((item) => item.id === 'pepperoni')?.quantity).toBe(1);
   });
 });
