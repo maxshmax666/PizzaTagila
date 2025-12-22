@@ -4,7 +4,7 @@ function NotificationsPage() {
   return (
     <div className="pt-stack">
       <h2 className="pt-section__title">Уведомления</h2>
-      <div className="pt-notice">
+      <div className="pt-notice pt-notice--large">
         Здесь будут уведомления о заказах и акциях.
       </div>
       <div className="pt-list-card">

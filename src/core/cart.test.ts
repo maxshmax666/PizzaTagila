@@ -48,9 +48,11 @@ describe('cart helpers', () => {
     expect(result[0]?.quantity).toBe(5);
   });
 
-  it('applies deltas safely', () => {
+  it('applies deltas safely and removes when empty', () => {
     const result = changeCartQuantity([baseItem], baseItem.id, -5);
-    expect(result[0]?.quantity).toBe(1);
+    expect(result).toHaveLength(0);
+    const increased = changeCartQuantity([baseItem], baseItem.id, 3);
+    expect(increased[0]?.quantity).toBe(4);
   });
 
   it('calculates totals with delivery and discount', () => {

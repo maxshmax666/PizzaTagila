@@ -51,11 +51,14 @@ export function updateCartQuantity(
 }
 
 export function changeCartQuantity(items: CartItem[], id: string, delta: number): CartItem[] {
-  return items.map((item) => {
-    if (item.id !== id) return item;
-    const nextQuantity = normalizeQuantity(item.quantity + delta);
-    return { ...item, quantity: nextQuantity };
-  });
+  return items
+    .map((item) => {
+      if (item.id !== id) return item;
+      const nextQuantity = item.quantity + delta;
+      if (nextQuantity <= 0) return null;
+      return { ...item, quantity: normalizeQuantity(nextQuantity) };
+    })
+    .filter(Boolean) as CartItem[];
 }
 
 export function addItemToCart(items: CartItem[], incoming: CartItem): CartItem[] {
@@ -69,4 +72,8 @@ export function addItemToCart(items: CartItem[], incoming: CartItem): CartItem[]
       ? { ...item, quantity: normalizeQuantity(item.quantity + incoming.quantity) }
       : item,
   );
+}
+
+export function removeItemFromCart(items: CartItem[], id: string): CartItem[] {
+  return items.filter((item) => item.id !== id);
 }

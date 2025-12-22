@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import type { CSSProperties, ReactNode } from 'react';
 
 import type { CartItem } from '../core/cart';
@@ -7,20 +7,27 @@ import { designTokens } from '../index';
 import './AppShell.css';
 
 export type AppNavigationKey =
+  | '/'
   | '/menu'
   | '/cart'
   | '/checkout'
-  | '/promos'
+  | '/deals'
   | '/delivery'
   | '/account'
   | '/notifications'
-  | '/loyalty';
+  | '/loyalty'
+  | '/contacts'
+  | '/offer';
 
 export interface AppLayoutProps {
   cartItems: CartItem[];
+  deliveryFee: number;
+  discount: number;
   onAddToCart: (item: CartItem) => void;
   onChangeQuantity: (id: string, delta: number) => void;
   onSetQuantity: (id: string, quantity: number) => void;
+  onRemoveFromCart: (id: string) => void;
+  onGoToCheckout: () => void;
 }
 
 export interface AppContextValue extends AppLayoutProps {
@@ -28,36 +35,37 @@ export interface AppContextValue extends AppLayoutProps {
 }
 
 const navLinks: { path: AppNavigationKey; label: string }[] = [
-  { path: '/menu', label: 'Меню' },
+  { path: '/', label: 'Меню' },
   { path: '/delivery', label: 'Доставка' },
-  { path: '/promos', label: 'Акции' },
+  { path: '/deals', label: 'Акции' },
   { path: '/loyalty', label: 'Лояльность' },
   { path: '/cart', label: 'Корзина' },
+  { path: '/account', label: 'Аккаунт' },
 ];
 
 const bottomLinks: { path: AppNavigationKey; label: string }[] = [
-  { path: '/menu', label: 'Меню' },
-  { path: '/promos', label: 'Акции' },
+  { path: '/', label: 'Меню' },
+  { path: '/deals', label: 'Акции' },
   { path: '/delivery', label: 'Доставка' },
-  { path: '/account', label: 'Контакты' },
-  { path: '/notifications', label: 'Оферта' },
+  { path: '/contacts', label: 'Контакты' },
+  { path: '/offer', label: 'Оферта' },
 ];
 
 function buildThemeVariables(): CSSProperties {
   const spacing = designTokens.core.space;
   const { radius, shadow, color } = designTokens.core;
   return {
-    '--pt-bg': '#fff3e6',
+    '--pt-bg': '#f1c183',
     '--pt-paper': '#f6d8ac',
     '--pt-primary': color.orange['500'],
     '--pt-primary-strong': color.orange['600'],
     '--pt-success': color.green['500'],
     '--pt-danger': '#d94a3a',
-    '--pt-surface': color.neutral['0'],
-    '--pt-surface-muted': color.orange['50'],
+    '--pt-surface': '#f7e4c7',
+    '--pt-surface-muted': '#f3d09e',
     '--pt-text': color.neutral['900'],
     '--pt-muted': color.neutral['500'],
-    '--pt-border': 'rgba(34,26,20,0.12)',
+    '--pt-border': 'rgba(34,26,20,0.16)',
     '--pt-radius-sm': `${radius.sm}px`,
     '--pt-radius-md': `${radius.md}px`,
     '--pt-radius-lg': `${radius.lg}px`,
@@ -74,7 +82,7 @@ function buildThemeVariables(): CSSProperties {
   } as CSSProperties;
 }
 
-function HeaderNavigation() {
+function HeaderNavigation({ cartCount }: { cartCount: number }) {
   return (
     <header className="pt-top-nav">
       <div className="pt-top-nav__brand">
@@ -92,27 +100,31 @@ function HeaderNavigation() {
             className={({ isActive }) => `pt-top-link ${isActive ? 'is-active' : ''}`}
           >
             {link.label}
+            {link.path === '/cart' && cartCount > 0 ? (
+              <span className="pt-top-link__badge">{cartCount}</span>
+            ) : null}
           </NavLink>
         ))}
         <button className="pt-top-call" type="button">
-          НЕТ72
+          NET72
         </button>
       </div>
     </header>
   );
 }
 
-function BottomNavigation({ current }: { current: string }) {
+function BottomNavigation() {
   return (
     <nav className="pt-bottom-nav">
       {bottomLinks.map((link) => (
-        <Link
+        <NavLink
           key={link.path}
           to={link.path}
-          className={`pt-bottom-link ${current.startsWith(link.path) ? 'is-active' : ''}`}
+          className={({ isActive }) => `pt-bottom-link ${isActive ? 'is-active' : ''}`}
+          end={link.path === '/'}
         >
           {link.label}
-        </Link>
+        </NavLink>
       ))}
     </nav>
   );
@@ -122,26 +134,29 @@ function PhoneShell({ children }: { children: ReactNode }) {
   return (
     <div className="pt-shell">
       <div className="pt-shell__grain" />
-      <div className="pt-shell__frame">
-        {children}
-      </div>
+      <div className="pt-shell__frame">{children}</div>
     </div>
   );
 }
 
 function AppLayout(props: AppLayoutProps) {
   const location = useLocation();
-  const totals = calculateCartTotals(props.cartItems, 99, 0);
+  const hasItems = props.cartItems.length > 0;
+  const totals = calculateCartTotals(
+    props.cartItems,
+    hasItems ? props.deliveryFee : 0,
+    hasItems ? props.discount : 0,
+  );
   const themeVariables = buildThemeVariables();
 
   return (
     <div className="pt-app" style={themeVariables}>
       <PhoneShell>
-        <HeaderNavigation />
+        <HeaderNavigation cartCount={totals.itemCount} />
         <main className="pt-content">
           <Outlet context={{ ...props, totals }} />
         </main>
-        <BottomNavigation current={location.pathname} />
+        <BottomNavigation key={location.pathname} />
       </PhoneShell>
     </div>
   );
