@@ -28,30 +28,31 @@ export const menuCategories: MenuCategory[] = ['Все', 'Классика', 'О
 
 export const menuItems: MenuItem[] = [
   {
-    id: 'pepperoni',
-    name: 'Пепперони',
-    description: 'Колбаски пепперони, моцарелла и томатный соус на тонком тесте.',
+    id: 'nectar',
+    name: 'Нектар в сырном',
+    description: 'Карамельное тесто, двойной сыр и сладкий соус.',
     price: 690,
     size: '25 см',
     category: 'Классика',
     badge: 'ХИТ',
-    spicy: true,
+    tag: 'Тонкое',
     image: '/assets/pizza-hero.svg',
   },
   {
-    id: 'barbeque',
-    name: 'Барбекю',
-    description: 'Говядина, бекон, фирменный BBQ-соус и лук в карамели.',
+    id: 'pepperoni',
+    name: 'Пепперони',
+    description: 'Классические колбаски, моцарелла и фирменный соус.',
     price: 690,
-    size: '30 см',
-    category: 'Хит',
-    tag: 'Ран/Печь 30 см',
+    size: '25 см',
+    category: 'Острые',
+    spicy: true,
+    tag: 'С перцем',
     image: '/assets/pizza-hero.svg',
   },
   {
     id: 'margarita',
     name: 'Маргарита',
-    description: 'Лёгкая томатная пицца с моцареллой и ароматным базиликом.',
+    description: 'Домашний соус, базилик, томаты и нежная моцарелла.',
     price: 540,
     size: '25 см',
     category: 'Веган',
@@ -59,28 +60,37 @@ export const menuItems: MenuItem[] = [
     image: '/assets/pizza-hero.svg',
   },
   {
-    id: 'diablo',
-    name: 'Острая Дьябло',
-    description: 'Халапеньо, перец чили, пепперони и острый фирменный соус.',
+    id: 'barbeque',
+    name: 'Барбекю',
+    description: 'Копчёный бекон, говядина, BBQ-соус и карамельный лук.',
     price: 720,
     size: '30 см',
-    category: 'Острые',
-    badge: 'НОВИНКА',
-    spicy: true,
+    category: 'Хит',
+    badge: 'СЫТНО',
+    image: '/assets/pizza-hero.svg',
+  },
+  {
+    id: 'veggie',
+    name: 'Веган гриль',
+    description: 'Овощи гриль, соус песто и лёгкая сырная корочка.',
+    price: 610,
+    size: '25 см',
+    category: 'Веган',
+    badge: 'NEW',
     image: '/assets/pizza-hero.svg',
   },
 ];
 
 export const initialCart: CartItem[] = [
   { id: 'pepperoni', name: 'Пепперони', price: 690, size: '25 см', quantity: 1, image: '/assets/pizza-hero.svg' },
-  { id: 'barbeque', name: 'Барбекю', price: 690, size: '30 см', quantity: 1, image: '/assets/pizza-hero.svg' },
+  { id: 'barbeque', name: 'Барбекю', price: 720, size: '30 см', quantity: 1, image: '/assets/pizza-hero.svg' },
 ];
 
 export const promotions: PromotionCard[] = [
   {
     id: 'welcome',
     title: 'Скидка -10% на первый заказ',
-    description: 'Нежнее, толще и с 10% при оплате онлайн.',
+    description: 'Первый заказ — скидка 10% при оплате онлайн.',
     badge: '10%',
     tone: 'orange',
     image: '/assets/pizza-hero.svg',
@@ -88,15 +98,17 @@ export const promotions: PromotionCard[] = [
   {
     id: 'gift',
     title: 'Подарок при заказе от 2550 ₽',
-    description: 'Добавим десерт автоматически.',
+    description: 'Тёплый десерт положим в подарок.',
     badge: 'Подарок',
     tone: 'green',
+    image: '/assets/pizza-hero.svg',
   },
   {
     id: 'hit',
     title: 'Хит недели',
     description: 'Пепперони, extra сыр и чесночный бортик.',
     tone: 'red',
+    badge: 'ХИТ',
     image: '/assets/pizza-hero.svg',
   },
 ];
@@ -111,6 +123,14 @@ export const deliverySlots = [
   { label: 'Сегодня', window: '17:00–25:00' },
   { label: 'Завтра', window: '12:00–22:00' },
 ];
+
+export const deliverySummary = {
+  featured: 'pepperoni',
+  eta: '15:00 · сейчас',
+  address: 'ул. Сенованная, д. 25',
+  price: 690,
+  weight: '55 г х',
+};
 
 export const accountShortcuts = [
   { id: 'phone', label: '+7 (902) 123-45-44', action: 'Изменить' },
@@ -130,4 +150,10 @@ export const offerPoints = [
   'Работаем по публичной оферте: аккуратная доставка и безопасная оплата.',
   'Минимальная сумма заказа — 550 ₽, доставка 99 ₽ по городу.',
   'Оплата онлайн или картой курьеру, персональные данные храним бережно.',
+];
+
+export const contactLinks = [
+  { id: 'phone', label: '+7 (992) 123-45-44', action: 'Позвонить', href: 'tel:+79921234544' },
+  { id: 'address', label: 'ул. Сенованная, д. 25', action: 'Открыть на карте', href: 'https://yandex.ru/maps' },
+  { id: 'support', label: 'Поддержка', action: 'help@pizza-tagil.ru', href: 'mailto:help@pizza-tagil.ru' },
 ];

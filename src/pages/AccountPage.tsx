@@ -9,11 +9,11 @@ function AccountPage() {
         <p className="pt-section__subtitle">Контакты</p>
         <div className="pt-list-item">
           <span>{contactInfo.phone}</span>
-          <span className="pt-muted">Изменить</span>
+          <span className="pt-pill pt-pill--ghost">Изменить</span>
         </div>
         <div className="pt-list-item">
           <span>{contactInfo.address}</span>
-          <span className="pt-muted">Сохранён</span>
+          <span className="pt-pill pt-pill--ghost">Сохранён</span>
         </div>
       </div>
 
@@ -27,7 +27,7 @@ function AccountPage() {
         ))}
       </div>
 
-      <button className="pt-button" type="button">
+      <button className="pt-button pt-button--danger" type="button">
         Выйти
       </button>
     </div>
