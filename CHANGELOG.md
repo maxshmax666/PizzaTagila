@@ -1,5 +1,10 @@
 # Changelog
 
+## 2025-12-22 (cloned facade deps + newcomer nav)
+- Added dependency cloning helpers (`createFacadeDependencies`, `cloneFacadeDependencies`) to keep default areas/tokens immutable across tests and runtime composition.
+- Wired `createPizzaTagila` to use cloned dependencies so consumers cannot accidentally mutate shared data.
+- Added a newcomer navigation guide at `docs/onboarding/newcomers/README.md` to point directly to facade, core, tokens, and commands.
+
 ## 2025-12-24 (facade factories + architecture canvas)
 - Added architecture canvas (`docs/architecture/README.md`) and scoped agent guide to help newcomers find entry points faster.
 - Introduced `composePizzaTagila` and factory overrides in `createPizzaTagila` to keep the facade testable with custom services.
