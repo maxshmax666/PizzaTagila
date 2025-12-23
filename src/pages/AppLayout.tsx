@@ -34,13 +34,11 @@ export interface AppContextValue extends AppLayoutProps {
   totals: ReturnType<typeof calculateCartTotals>;
 }
 
-const navLinks: { path: AppNavigationKey; label: string }[] = [
-  { path: '/', label: 'Меню' },
+const navLinks: { path: AppNavigationKey; label: string; end?: boolean }[] = [
+  { path: '/', label: 'Меню', end: true },
   { path: '/delivery', label: 'Доставка' },
-  { path: '/deals', label: 'Акции' },
-  { path: '/loyalty', label: 'Лояльность' },
   { path: '/cart', label: 'Корзина' },
-  { path: '/account', label: 'Аккаунт' },
+  { path: '/account', label: 'Кабинет' },
 ];
 
 const bottomLinks: { path: AppNavigationKey; label: string }[] = [
@@ -97,6 +95,7 @@ function HeaderNavigation({ cartCount }: { cartCount: number }) {
           <NavLink
             key={link.path}
             to={link.path}
+            end={link.end}
             className={({ isActive }) => `pt-top-link ${isActive ? 'is-active' : ''}`}
           >
             {link.label}
