@@ -2,32 +2,39 @@ import { accountShortcuts, contactInfo } from '../data/uiContent';
 
 function AccountPage() {
   return (
-    <div className="pt-stack">
-      <h2 className="pt-section__title">Аккаунт</h2>
+    <div className="pt-page">
+      <header className="pt-page__header">
+        <h2>Кабинет</h2>
+        <p className="pt-muted">Профиль и история заказов.</p>
+      </header>
 
-      <div className="pt-list-card">
-        <p className="pt-section__subtitle">Контакты</p>
-        <div className="pt-list-item">
+      <section className="pt-panel">
+        <h3>Вход по телефону</h3>
+        <div className="pt-field">
           <span>{contactInfo.phone}</span>
-          <span className="pt-pill pt-pill--ghost">Изменить</span>
+          <button className="pt-chip" type="button">
+            Изменить
+          </button>
         </div>
-        <div className="pt-list-item">
+        <div className="pt-field">
           <span>{contactInfo.address}</span>
-          <span className="pt-pill pt-pill--ghost">Сохранён</span>
+          <span className="pt-muted">Сохранён</span>
         </div>
-      </div>
+      </section>
 
-      <div className="pt-list-card">
-        <p className="pt-section__subtitle">Действия</p>
-        {accountShortcuts.map((item) => (
-          <div key={item.id} className="pt-list-item">
-            <span>{item.label}</span>
-            <span className="pt-muted">{item.action}</span>
-          </div>
-        ))}
-      </div>
+      <section className="pt-panel">
+        <h3>История заказов</h3>
+        <div className="pt-slot-list">
+          {accountShortcuts.map((item) => (
+            <div key={item.id} className="pt-slot">
+              <span>{item.label}</span>
+              <span className="pt-muted">{item.action}</span>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <button className="pt-button pt-button--danger" type="button">
+      <button className="pt-cta pt-cta--danger" type="button">
         Выйти
       </button>
     </div>

@@ -16,87 +16,88 @@ function CheckoutPage() {
   );
 
   return (
-    <div className="pt-stack">
-      <h2 className="pt-section__title">Оформление заказа</h2>
+    <div className="pt-page">
+      <header className="pt-page__header">
+        <h2>Оформление заказа</h2>
+        <p className="pt-muted">Проверьте адрес и подтвердите оплату.</p>
+      </header>
 
-      <div className="pt-checkout">
-        <div className="pt-checkout__card pt-checkout__card--accent">
-          <div className="pt-checkout__row">
-            <div className="pt-pill pt-pill--ghost">Телефон для связи</div>
-            <div className="pt-pill pt-pill--solid">15:00</div>
-          </div>
+      <section className="pt-panel pt-panel--highlight">
+        <div className="pt-panel__row">
+          <span>Телефон для связи</span>
+          <span className="pt-chip">15:00</span>
+        </div>
+        <input
+          className="pt-input"
+          value={phone}
+          onChange={(event) => setPhone(event.target.value)}
+          aria-label="Телефон"
+        />
+      </section>
+
+      <section className="pt-panel">
+        <label className="pt-field-stack">
+          <span>Адрес</span>
           <input
             className="pt-input"
-            value={phone}
-            onChange={(event) => setPhone(event.target.value)}
-            aria-label="Телефон"
+            value={address}
+            onChange={(event) => setAddress(event.target.value)}
           />
-        </div>
+        </label>
+        <label className="pt-field-stack">
+          <span>Комментарий курьеру</span>
+          <textarea
+            className="pt-textarea"
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+          />
+        </label>
+        <label className="pt-field-stack">
+          <span>Способ оплаты</span>
+          <select
+            className="pt-input"
+            value={payment}
+            onChange={(event) => setPayment(event.target.value)}
+          >
+            <option>Наличными</option>
+            <option>Картой курьеру</option>
+            <option>Онлайн</option>
+          </select>
+        </label>
+      </section>
 
-        <div className="pt-checkout__card">
-          <label className="pt-stack">
-            <span className="pt-section__subtitle">Адрес</span>
-            <input
-              className="pt-input"
-              value={address}
-              onChange={(event) => setAddress(event.target.value)}
-            />
-          </label>
-          <label className="pt-stack">
-            <span className="pt-section__subtitle">Комментарий курьеру</span>
-            <textarea
-              className="pt-textarea"
-              value={comment}
-              onChange={(event) => setComment(event.target.value)}
-            />
-          </label>
-          <label className="pt-stack">
-            <span className="pt-section__subtitle">Способ оплаты</span>
-            <select
-              className="pt-input"
-              value={payment}
-              onChange={(event) => setPayment(event.target.value)}
-            >
-              <option>Наличными</option>
-              <option>Картой курьеру</option>
-              <option>Онлайн</option>
-            </select>
-          </label>
+      <section className="pt-summary">
+        <div className="pt-summary__row">
+          <span>Товары</span>
+          <span>{summary.subtotal} ₽</span>
         </div>
-
-        <div className="pt-total-card">
-          <div className="pt-row">
-            <span>Товары</span>
-            <span>{summary.subtotal} ₽</span>
-          </div>
-          <div className="pt-row pt-row--muted">
-            <span>Доставка</span>
-            <span>{summary.deliveryFee} ₽</span>
-          </div>
-          <div className="pt-row pt-row--muted">
-            <span>Промокод</span>
-            <span>{summary.discount} ₽</span>
-          </div>
-          <div className="pt-row">
-            <span>Итого</span>
-            <span>{summary.total} ₽</span>
-          </div>
-          <div className="pt-divider" />
-          <div className="pt-cart-mini">
-            {cartItems.map((item) => (
-              <div key={item.id} className="pt-cart-mini__row">
-                <span>{item.name}</span>
-                <span className="pt-muted">
-                  {item.quantity} × {item.price} ₽
-                </span>
-              </div>
-            ))}
-          </div>
-          <button className="pt-button" type="button">
-            Подтвердить заказ
-          </button>
+        <div className="pt-summary__row pt-summary__row--muted">
+          <span>Доставка</span>
+          <span>{summary.deliveryFee} ₽</span>
         </div>
-      </div>
+        <div className="pt-summary__row pt-summary__row--muted">
+          <span>Промокод</span>
+          <span>{summary.discount} ₽</span>
+        </div>
+        <div className="pt-summary__row pt-summary__row--total">
+          <span>Итого</span>
+          <span>{summary.total} ₽</span>
+        </div>
+        <div className="pt-summary__divider" />
+        <div className="pt-summary__list">
+          {cartItems.map((item) => (
+            <div key={item.id} className="pt-summary__item">
+              <span>{item.name}</span>
+              <span className="pt-muted">
+                {item.quantity} × {item.price} ₽
+              </span>
+            </div>
+          ))}
+        </div>
+        <button className="pt-cta" type="button">
+          Подтвердить заказ
+        </button>
+      </section>
     </div>
   );
 }
