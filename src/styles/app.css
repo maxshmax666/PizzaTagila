@@ -12,6 +12,7 @@
 .pt-app {
   min-height: 100vh;
   background:
+    url('/assets/background1.png') center / cover no-repeat,
     radial-gradient(circle at 20% 10%, rgba(229, 126, 34, 0.25), transparent 55%),
     radial-gradient(circle at 80% 20%, rgba(47, 174, 99, 0.18), transparent 60%),
     linear-gradient(145deg, #4f3e31 0%, #362a21 45%, #221a14 100%);
