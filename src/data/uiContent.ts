@@ -13,6 +13,7 @@ export interface MenuItem {
   tag?: string;
   spicy?: boolean;
   image: string;
+  gallery?: string[];
 }
 
 export interface PromotionCard {
@@ -25,6 +26,12 @@ export interface PromotionCard {
 }
 
 export const menuCategories: MenuCategory[] = ['Все', 'Классика', 'Острые', 'Веган', 'Хит'];
+
+const buildGallery = (baseName: string, count: number) =>
+  Array.from({ length: count }, (_, index) => `/assets/${baseName}${index + 1}.jpg`);
+
+const margaritaGallery = buildGallery('margarita', 3);
+const fourCheeseGallery = buildGallery('4cheese', 2);
 
 export const menuItems: MenuItem[] = [
   {
@@ -57,7 +64,8 @@ export const menuItems: MenuItem[] = [
     size: '25 см',
     category: 'Веган',
     tag: 'Лёгкая',
-    image: '/assets/pizza-hero.svg',
+    image: margaritaGallery[0],
+    gallery: margaritaGallery,
   },
   {
     id: 'barbeque',
@@ -87,7 +95,8 @@ export const menuItems: MenuItem[] = [
     size: '30 см',
     category: 'Классика',
     badge: 'ТОП',
-    image: '/assets/pizza-hero.svg',
+    image: fourCheeseGallery[0],
+    gallery: fourCheeseGallery,
   },
   {
     id: 'hunting',
