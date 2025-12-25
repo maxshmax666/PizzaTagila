@@ -357,6 +357,7 @@
   gap: 12px;
   position: relative;
   min-height: 280px;
+  cursor: pointer;
 }
 
 .pt-pizza-card__media {
@@ -421,6 +422,103 @@
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 12px 24px rgba(229, 126, 34, 0.3);
+}
+
+.pt-pizza-card:focus-visible {
+  outline: 2px solid rgba(229, 126, 34, 0.8);
+  outline-offset: 2px;
+}
+
+.pt-gallery-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+}
+
+.pt-gallery-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 6, 4, 0.7);
+  border: none;
+}
+
+.pt-gallery-modal__panel {
+  position: relative;
+  width: min(560px, calc(100vw - 32px));
+  background: rgba(16, 10, 6, 0.95);
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  padding: 24px;
+  display: grid;
+  gap: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.pt-gallery-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pt-gallery-modal__header h3 {
+  margin: 4px 0 0;
+  font-size: 20px;
+}
+
+.pt-gallery-modal__close {
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.pt-gallery-modal__image {
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  display: grid;
+  place-items: center;
+}
+
+.pt-gallery-modal__image img {
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+}
+
+.pt-gallery-modal__thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  gap: 8px;
+}
+
+.pt-gallery-modal__thumb {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px;
+  cursor: pointer;
+}
+
+.pt-gallery-modal__thumb img {
+  width: 100%;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.pt-gallery-modal__thumb.is-active {
+  border-color: rgba(229, 126, 34, 0.8);
+  box-shadow: 0 0 0 2px rgba(229, 126, 34, 0.2);
 }
 
 .pt-cart-mini {

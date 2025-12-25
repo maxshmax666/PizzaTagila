@@ -2,12 +2,15 @@ import { useMemo, useState } from 'react';
 
 import type { CartItem } from '../core/cart';
 import CartMini from '../components/CartMini';
+import PizzaGalleryModal from '../components/PizzaGalleryModal';
 import PizzaCard from '../components/PizzaCard';
 import { menuCategories, menuItems } from '../data/uiContent';
 import { useAppContext } from './useAppContext';
 
 function MenuPage() {
   const [category, setCategory] = useState<(typeof menuCategories)[number]>('Все');
+  const [activeItem, setActiveItem] = useState<(typeof menuItems)[number] | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   const { cartItems, onAddToCart, totals, onGoToCheckout } = useAppContext();
 
   const filtered = useMemo(
@@ -23,6 +26,14 @@ function MenuPage() {
     const bestSeller = menuItems[0];
     onAddToCart({ ...bestSeller, quantity: 1 });
     onGoToCheckout();
+  };
+  const handleSelect = (item: (typeof menuItems)[number]) => {
+    setActiveItem(item);
+    setActiveIndex(0);
+  };
+  const handleCloseGallery = () => {
+    setActiveItem(null);
+    setActiveIndex(0);
   };
   const itemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -60,7 +71,7 @@ function MenuPage() {
       <div className="pt-menu-layout">
         <section className="pt-menu-grid">
           {filtered.map((item) => (
-            <PizzaCard key={item.id} item={item} onAdd={handleAdd} />
+            <PizzaCard key={item.id} item={item} onAdd={handleAdd} onSelect={handleSelect} />
           ))}
         </section>
         <aside className="pt-menu-aside">
@@ -69,6 +80,14 @@ function MenuPage() {
       </div>
 
       <CartMini totals={totals} itemCount={itemsCount} variant="mobile" />
+
+      <PizzaGalleryModal
+        item={activeItem}
+        isOpen={Boolean(activeItem)}
+        activeIndex={activeIndex}
+        onClose={handleCloseGallery}
+        onSelect={setActiveIndex}
+      />
     </div>
   );
 }

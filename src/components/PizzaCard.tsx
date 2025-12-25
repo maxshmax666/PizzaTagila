@@ -4,11 +4,25 @@ import type { MenuItem } from '../data/uiContent';
 interface PizzaCardProps {
   item: MenuItem;
   onAdd: (item: CartItem) => void;
+  onSelect?: (item: MenuItem) => void;
 }
 
-function PizzaCard({ item, onAdd }: PizzaCardProps) {
+function PizzaCard({ item, onAdd, onSelect }: PizzaCardProps) {
+  const handleSelect = () => onSelect?.(item);
+
   return (
-    <article className="pt-pizza-card">
+    <article
+      className="pt-pizza-card"
+      role="button"
+      tabIndex={0}
+      onClick={handleSelect}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleSelect();
+        }
+      }}
+    >
       <div className="pt-pizza-card__media">
         <img src={item.image} alt={item.name} />
         {item.badge ? <span className="pt-badge">{item.badge}</span> : null}
@@ -23,7 +37,10 @@ function PizzaCard({ item, onAdd }: PizzaCardProps) {
         <button
           className="pt-add-button"
           type="button"
-          onClick={() => onAdd({ ...item, quantity: 1 })}
+          onClick={(event) => {
+            event.stopPropagation();
+            onAdd({ ...item, quantity: 1 });
+          }}
         >
           +
         </button>
