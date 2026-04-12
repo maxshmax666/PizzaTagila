@@ -1,13 +1,11 @@
 import { Outlet } from 'react-router-dom';
-import type { CSSProperties } from 'react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import AppShell from '../components/AppShell';
-import BottomBar from '../components/BottomBar';
+import SideNav from '../components/SideNav';
 import TopBar from '../components/TopBar';
 import type { CartItem } from '../core/cart';
 import { calculateCartTotals } from '../core/cart';
-import { designTokens } from '../index';
 import '../styles/app.css';
 
 export type AppNavigationKey =
@@ -34,20 +32,27 @@ export interface AppLayoutProps {
 
 export interface AppContextValue extends AppLayoutProps {
   totals: ReturnType<typeof calculateCartTotals>;
+  isTablet: boolean;
 }
 
-function buildThemeVariables(): CSSProperties {
-  const { color, radius, shadow } = designTokens.core;
-  return {
-    '--bg-wood': color.neutral['900'],
-    '--glass': 'rgba(26, 18, 14, 0.72)',
-    '--glass-border': 'rgba(255, 226, 194, 0.18)',
-    '--glow-orange': 'rgba(229, 126, 34, 0.5)',
-    '--text': color.orange['50'],
-    '--muted': color.neutral['300'],
-    '--radius-xl': `${radius.lg}px`,
-    '--shadow-soft': `${shadow.lg.x}px ${shadow.lg.y}px ${shadow.lg.blur}px ${shadow.lg.spread}px rgba(0, 0, 0, 0.45)`,
-  } as CSSProperties;
+function useTabletQuery() {
+  const [isTablet, setIsTablet] = useState(() =>
+    typeof window !== 'undefined'
+      ? window.matchMedia('(min-width: 1024px) and (max-width: 1280px)').matches
+      : false,
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const media = window.matchMedia('(min-width: 1024px) and (max-width: 1280px)');
+    const onChange = () => setIsTablet(media.matches);
+    onChange();
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  return isTablet;
 }
 
 function AppLayout(props: AppLayoutProps) {
@@ -61,16 +66,29 @@ function AppLayout(props: AppLayoutProps) {
       ),
     [props.cartItems, props.deliveryFee, props.discount, hasItems],
   );
-  const themeVariables = buildThemeVariables();
+  const isTablet = useTabletQuery();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div className="pt-app" style={themeVariables}>
+    <div className="pt-app">
       <AppShell>
-        <TopBar cartCount={totals.itemCount} />
-        <main className="pt-content">
-          <Outlet context={{ ...props, totals }} />
-        </main>
-        <BottomBar cartCount={totals.itemCount} />
+        <div className="pt-layout">
+          <SideNav
+            isTablet={isTablet}
+            isOpen={isTablet ? true : drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+          />
+          <section className="pt-main">
+            <TopBar
+              cartCount={totals.itemCount}
+              onMenuToggle={() => setDrawerOpen((previous) => !previous)}
+              isTablet={isTablet}
+            />
+            <main className="pt-content">
+              <Outlet context={{ ...props, totals, isTablet }} />
+            </main>
+          </section>
+        </div>
       </AppShell>
     </div>
   );
