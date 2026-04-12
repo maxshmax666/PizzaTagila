@@ -24,23 +24,25 @@ function PizzaCard({ item, onAdd, onSelect }: PizzaCardProps) {
       }}
     >
       <div className="pt-pizza-card__media">
-        <img src={item.image} alt={item.name} />
-        {item.badge ? <span className="pt-badge">{item.badge}</span> : null}
+        <img src={item.image} alt={item.name} loading="lazy" />
+        {item.badge ? <span className="pt-card-badge">{item.badge}</span> : null}
       </div>
       <div className="pt-pizza-card__body">
         <h3>{item.name}</h3>
-        <p>{item.description}</p>
+        <p className="pt-pizza-card__desc">{item.description}</p>
         <div className="pt-pizza-card__meta">
-          <span className="pt-price">{item.price} ₽</span>
-          <span className="pt-muted">{item.size}</span>
+          <span>⭐ {item.rating.toFixed(1)}</span>
+          <span>◷ {item.cookTime} мин</span>
         </div>
+        <p className="pt-pizza-card__price">от {item.price} ₽</p>
         <button
-          className="pt-add-button"
+          className="pt-pizza-card__add"
           type="button"
           onClick={(event) => {
             event.stopPropagation();
             onAdd({ ...item, quantity: 1 });
           }}
+          aria-label={`Добавить ${item.name}`}
         >
           +
         </button>

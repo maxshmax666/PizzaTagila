@@ -5,12 +5,7 @@ interface AppShellProps {
 }
 
 function AppShell({ children }: AppShellProps) {
-  return (
-    <div className="pt-shell">
-      <div className="pt-shell__glow" aria-hidden="true" />
-      <div className="pt-shell__frame">{children}</div>
-    </div>
-  );
+  return <div className="pt-shell">{children}</div>;
 }
 
 export default AppShell;
