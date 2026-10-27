@@ -22,7 +22,7 @@ const webContainer = getWebContainer(designTokens);
 function DesignSystemPage() {
   const totalComponents = Object.keys(lookup).length;
   const eightPointReady = usesEightPointSpacing(designTokens);
-  const buttonHeight = Number(designTokens.components.button.height);
+  const buttonHeight = Number((designTokens.components.button as Record<string, unknown>).height);
   const touchFriendly = isTouchTargetCompliant(buttonHeight, designTokens);
 
   return (
