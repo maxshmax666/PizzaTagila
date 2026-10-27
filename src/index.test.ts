@@ -167,7 +167,7 @@ describe('facade configuration', () => {
           tags: ['navigation', 'action'],
         },
       ],
-    } as const;
+    } satisfies ComponentArea;
 
     const customTokens: typeof designTokens = {
       ...designTokens,
