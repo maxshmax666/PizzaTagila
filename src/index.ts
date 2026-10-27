@@ -143,9 +143,6 @@ export function composePizzaTagila(
   const layoutServices = layoutFactory(clonedDependencies.tokens);
 
   return {
-    areas: clonedDependencies.areas,
-    tokens: layoutServices.tokens,
-    lookup: areaServices.lookup,
     ...areaServices,
     ...layoutServices,
   };
