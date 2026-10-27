@@ -62,7 +62,7 @@ const spacing = designTokens.core.space;
 const toShadow = (shadow: { x: number; y: number; blur: number; spread: number; color: string }) =>
   `${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.spread}px ${shadow.color}`;
 
-const themeVariables: CSSProperties = {
+const themeVariables: CSSProperties & Record<`--${string}`, string | number> = {
   '--pt-surface': designTokens.core.color.neutral['0'],
   '--pt-surface-muted': designTokens.core.color.orange['50'],
   '--pt-text-primary': designTokens.core.color.neutral['900'],
@@ -70,7 +70,7 @@ const themeVariables: CSSProperties = {
   '--pt-primary': designTokens.core.color.orange['500'],
   '--pt-primary-strong': designTokens.core.color.orange['600'],
   '--pt-success': designTokens.core.color.green['500'],
-  '--pt-border': designTokens.semantic.border.default,
+  '--pt-border': String((designTokens.semantic.border as Record<string, unknown>).default),
   '--pt-radius-card': `${designTokens.core.radius.lg}px`,
   '--pt-radius-md': `${designTokens.core.radius.md}px`,
   '--pt-radius-pill': `${designTokens.core.radius.pill}px`,
