@@ -64,7 +64,7 @@ function DesignSystemPage() {
               <strong>Surface:</strong> {designTokens.core.color.neutral['0']}
             </li>
             <li>
-              <strong>Border:</strong> {designTokens.semantic.border.default}
+              <strong>Border:</strong> {String((designTokens.semantic.border as Record<string, unknown>).default)}
             </li>
           </ul>
         </div>
